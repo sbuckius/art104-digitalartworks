@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Firebase Quilt Grid (50 images + captions)</title>
+  <style>
+    :root { --gap: 12px; --tile: 160px; }
+    body { font-family: system-ui, Arial, sans-serif; margin: 0; padding: 18px; background: #fafafa; }
+    h1 { font-size: 18px; margin: 0 0 10px; font-weight: 650; }
+
+    .bar {
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+      background: white; padding: 12px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.06);
+      margin-bottom: 14px;
+    }
+    .bar input[type="file"] { max-width: 320px; }
+    .bar input[type="text"] {
+      flex: 1 1 220px;
+      min-width: 200px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      outline: none;
+    }
+    .bar button {
+      border: 0; padding: 10px 12px; border-radius: 10px; cursor: pointer;
+      background: #111; color: #fff; font-weight: 650;
+    }
+    .bar button.secondary {
+      background: #fff; color: #111; border: 1px solid #ddd;
+    }
+    .bar button:disabled { opacity: .5; cursor: not-allowed; }
+    .status { font-size: 13px; color: #444; }
+
+    /* Save whole screen target */
+    #captureArea { max-width: 1200px; margin: 0 auto; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(var(--tile), 1fr));
+      gap: var(--gap);
+    }
+    .card {
+      background: white;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,.06);
+      display: flex;
+      flex-direction: column;
+    }
+    .tile {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      cursor: pointer;
+      background: #f2f2f2;
+    }
+    .tile img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transform: scale(1.001);
+    }
+    .meta {
+      position: absolute; left: 8px; top: 8px;
+      background: rgba(0,0,0,.55); color: white;
+      font-size: 11px; padding: 4px 6px; border-radius: 999px;
+      backdrop-filter: blur(6px);
+    }
+    .caption {
+      padding: 10px 10px 12px;
+      font-size: 13px;
+      color: #222;
+      line-height: 1.25;
+      border-top: 1px solid #eee;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      word-break: break-word;
+    }
+    .empty {
+      padding: 18px; color: #666; font-size: 14px;
+      background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.06);
+    }
+
+    /* Lightbox */
+    .lightbox {
+      position: fixed; inset: 0; background: rgba(0,0,0,.75);
+      display: none; align-items: center; justify-content: center; padding: 18px;
+      z-index: 50;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img {
+      max-width: min(980px, 96vw);
+      max-height: 92vh;
+      border-radius: 14px;
+      box-shadow: 0 12px 50px rgba(0,0,0,.45);
+      background: #000;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="captureArea">
+    <h1>Please upload an image of your favorite digital artwork.</h1>
+
+    <div class="bar">
+      <input id="file" type="file" accept="image/*" />
+      <input id="captionInput" type="text" placeholder="Type a caption for your image..." maxlength="120" />
+      <button id="uploadBtn" disabled>Upload</button>
+
+      <button id="resetBtn" class="secondary" title="Clears the whole board for everyone (demo mode)">
+        Reset
+      </button>
+
+      <button id="saveBtn" class="secondary" title="Downloads a screenshot of this page">
+        Save Screen
+      </button>
+
+      <span class="status" id="status">Choose an image to upload.</span>
+    </div>
+
+    <div id="grid" class="grid"></div>
+    <div id="empty" class="empty" style="display:none;">
+      No images yet. Upload the first one!
+    </div>
+  </div>
+
+  <div id="lightbox" class="lightbox" aria-hidden="true">
+    <img id="lightboxImg" alt="Full view" />
+  </div>
+
+  <!-- For "Save Screen" -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+  <script type="module">
+    // Firebase v9 modular imports (CDN)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+
+    import {
+      getAuth,
+      signInAnonymously,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+    import {
+      getDatabase,
+      ref as dbRef,
+      push,
+      query,
+      limitToLast,
+      onValue,
+      serverTimestamp,
+      remove
+    } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+    import {
+      getStorage,
+      ref as stRef,
+      uploadBytes,
+      getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+
+    // 1) TODO: Replace with your Firebase config
+const firebaseConfig = {
+
+  apiKey: "AIzaSyBCLpqzaQED9PpwSzVOgmEmx9PMngVqaoE",
+
+  authDomain: "art104digitalartwork.firebaseapp.com",
+
+  databaseURL: "https://art104digitalartwork-default-rtdb.firebaseio.com",
+
+  projectId: "art104digitalartwork",
+
+  storageBucket: "art104digitalartwork.firebasestorage.app",
+
+  messagingSenderId: "658605624357",
+
+  appId: "1:658605624357:web:9ba9695568e8e2afdf83cc",
+
+  measurementId: "G-1BP2M55DJR"
+
+};
+    // 2) Init
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const storage = getStorage(app);
+
+    // 3) UI refs
+    const fileInput = document.getElementById("file");
+    const captionInput = document.getElementById("captionInput");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const statusEl = document.getElementById("status");
+    const gridEl = document.getElementById("grid");
+    const emptyEl = document.getElementById("empty");
+    const captureArea = document.getElementById("captureArea");
+
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImg = document.getElementById("lightboxImg");
+
+    let currentUser = null;
+    let selectedFile = null;
+
+    function setStatus(msg) { statusEl.textContent = msg; }
+
+    function setUploading(isUploading) {
+      uploadBtn.disabled = isUploading || !selectedFile || !currentUser;
+      fileInput.disabled = isUploading;
+      captionInput.disabled = isUploading;
+      resetBtn.disabled = isUploading;
+      saveBtn.disabled = isUploading;
+    }
+
+    // 4) Auth
+    signInAnonymously(auth).catch((err) => {
+      console.error(err);
+      setStatus("Auth error. Enable Anonymous Auth in Firebase.");
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      setStatus(user ? "Signed in. Choose an image and add a caption." : "Signing in...");
+      setUploading(false);
+    });
+
+    // 5) File selection
+    fileInput.addEventListener("change", () => {
+      selectedFile = fileInput.files?.[0] || null;
+      if (!selectedFile) {
+        setStatus("Choose an image to upload.");
+        setUploading(false);
+        return;
+      }
+      if (!selectedFile.type.startsWith("image/")) {
+        selectedFile = null;
+        fileInput.value = "";
+        setStatus("Please choose an image file.");
+        setUploading(false);
+        return;
+      }
+      if (selectedFile.size > 6 * 1024 * 1024) {
+        selectedFile = null;
+        fileInput.value = "";
+        setStatus("Image too large. Please keep it under 6MB.");
+        setUploading(false);
+        return;
+      }
+      setStatus(`Ready: ${selectedFile.name} (add a caption, then Upload)`);
+      setUploading(false);
+    });
+
+    // 6) Upload flow (image + caption)
+    uploadBtn.addEventListener("click", async () => {
+      if (!selectedFile || !currentUser) return;
+
+      setUploading(true);
+      setStatus("Uploading...");
+
+      try {
+        const uid = currentUser.uid;
+        const safeName = selectedFile.name.replace(/[^\w.\-]+/g, "_");
+        const path = `quiltUploads/${uid}/${Date.now()}_${safeName}`;
+        const caption = (captionInput.value || "").trim().slice(0, 120);
+
+        const storageRef = stRef(storage, path);
+        await uploadBytes(storageRef, selectedFile, { contentType: selectedFile.type });
+        const url = await getDownloadURL(storageRef);
+
+        const imagesRef = dbRef(db, "quiltImages");
+        await push(imagesRef, {
+          url,
+          path,
+          uid,
+          caption,
+          createdAt: serverTimestamp()
+        });
+
+        selectedFile = null;
+        fileInput.value = "";
+        captionInput.value = "";
+        setStatus("Uploaded! Everyone should see it now.");
+      } catch (err) {
+        console.error(err);
+        setStatus("Upload failed. Check rules / config.");
+      } finally {
+        setUploading(false);
+      }
+    });
+
+    // 7) Live listener: last 50 images
+    const feedQuery = query(dbRef(db, "quiltImages"), limitToLast(50));
+    onValue(feedQuery, (snap) => {
+      const val = snap.val() || {};
+      const items = Object.entries(val).map(([key, data]) => ({ key, ...data }));
+
+      // Sort by createdAt when available
+      items.sort((a, b) => {
+        const ta = typeof a.createdAt === "number" ? a.createdAt : 0;
+        const tb = typeof b.createdAt === "number" ? b.createdAt : 0;
+        return ta - tb;
+      });
+
+      renderGrid(items);
+    });
+
+    function renderGrid(items) {
+      gridEl.innerHTML = "";
+      emptyEl.style.display = items.length ? "none" : "block";
+
+      for (const item of items) {
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const tile = document.createElement("div");
+        tile.className = "tile";
+        tile.title = "Click to view";
+
+        const img = document.createElement("img");
+        img.loading = "lazy";
+        img.src = item.url;
+        img.alt = "uploaded artwork";
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.textContent = item.uid ? item.uid.slice(0, 6) : "user";
+
+        tile.appendChild(img);
+        tile.appendChild(meta);
+
+        tile.addEventListener("click", () => openLightbox(item.url));
+
+        const cap = document.createElement("div");
+        cap.className = "caption";
+        cap.textContent = item.caption?.trim() ? item.caption.trim() : "(no caption)";
+
+        card.appendChild(tile);
+        card.appendChild(cap);
+
+        gridEl.appendChild(card);
+      }
+    }
+
+    // 8) Reset (clears the board for everyone) — demo mode
+    resetBtn.addEventListener("click", async () => {
+      const ok = confirm("Reset clears ALL images from the shared grid for everyone. Continue?");
+      if (!ok) return;
+
+      try {
+        setUploading(true);
+        setStatus("Resetting board...");
+        await remove(dbRef(db, "quiltImages"));
+        setStatus("Board reset.");
+      } catch (err) {
+        console.error(err);
+        setStatus("Reset failed. Check DB rules.");
+      } finally {
+        setUploading(false);
+      }
+    });
+
+    // 9) Save Screen (downloads a PNG of the page area)
+    saveBtn.addEventListener("click", async () => {
+      try {
+        setStatus("Saving screen...");
+        // Use devicePixelRatio for sharper image, but clamp so it doesn't get huge
+        const scale = Math.min(2, window.devicePixelRatio || 1);
+
+        const canvas = await window.html2canvas(captureArea, {
+          scale,
+          useCORS: true,
+          backgroundColor: "#fafafa"
+        });
+
+        const pngUrl = canvas.toDataURL("image/png");
+        const a = document.createElement("a");
+        a.href = pngUrl;
+        a.download = `quilt_${Date.now()}.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        setStatus("Saved! (download started)");
+      } catch (err) {
+        console.error(err);
+        setStatus("Save failed. (Sometimes CORS can block screenshots.)");
+      }
+    });
+
+    // Lightbox
+    function openLightbox(url) {
+      lightboxImg.src = url;
+      lightbox.classList.add("open");
+      lightbox.setAttribute("aria-hidden", "false");
+    }
+    function closeLightbox() {
+      lightbox.classList.remove("open");
+      lightbox.setAttribute("aria-hidden", "true");
+      lightboxImg.src = "";
+    }
+    lightbox.addEventListener("click", closeLightbox);
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeLightbox();
+    });
+
+    setUploading(false);
+  </script>
+</body>
+</html>
