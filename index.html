@@ -147,6 +147,102 @@
     text-decoration: underline;
     word-break: break-all;
   }
+
+/* ================= MODAL ================= */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 100;
+}
+
+.modal.open { 
+  display: flex; 
+}
+
+.panel {
+  width: min(560px, 96vw);
+  background: white;
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 18px 70px rgba(0,0,0,.35);
+}
+
+.panel h2 { 
+  margin: 0 0 12px; 
+  font-size: 18px; 
+}
+
+.row { 
+  display: flex; 
+  flex-direction: column;
+  gap: 10px; 
+}
+
+.panel input[type="file"] { 
+  width: 100%; 
+}
+
+.panel input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  outline: none;
+  font-size: 14px;
+}
+
+.panel .buttons { 
+  display: flex; 
+  justify-content: flex-end; 
+  gap: 10px; 
+  margin-top: 12px; 
+}
+
+.panel button {
+  border: 0; 
+  padding: 10px 12px; 
+  border-radius: 10px; 
+  cursor: pointer;
+  background: #111; 
+  color: #fff; 
+  font-weight: 650;
+}
+
+.panel button.secondary { 
+  background: #fff; 
+  color: #111; 
+  border: 1px solid #ddd; 
+}
+
+/* ================= LIGHTBOX ================= */
+
+.lightbox {
+  position: fixed; 
+  inset: 0; 
+  background: rgba(0,0,0,.75);
+  display: none; 
+  align-items: center; 
+  justify-content: center; 
+  padding: 18px;
+  z-index: 200;
+}
+
+.lightbox.open { 
+  display: flex; 
+}
+
+.lightbox img {
+  max-width: min(1100px, 96vw);
+  max-height: 92vh;
+  border-radius: 16px;
+  background: #000;
+}
 </style>
 </head>
 
