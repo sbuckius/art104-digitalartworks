@@ -4,136 +4,165 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Your Digital Artwork</title>
+
   <style>
-    :root { --gap: 10px; --tile: 130px; }
-    body { font-family: system-ui, Arial, sans-serif; margin: 0; padding: 18px; background: #fafafa; }
-    #captureArea { max-width: 1200px; margin: 0 auto; }
+  :root { --gap: 14px; --tile: 130px; }
 
-    h1 { font-size: 18px; margin: 0 0 10px; font-weight: 650; }
+  body { 
+    font-family: system-ui, Arial, sans-serif; 
+    margin: 0; 
+    padding: 18px; 
+    background: #fafafa; 
+  }
 
-    .bar {
-      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
-      background: white; padding: 12px; border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,.06);
-      margin-bottom: 14px;
-    }
-    .bar button {
-      border: 0; padding: 10px 12px; border-radius: 10px; cursor: pointer;
-      background: #111; color: #fff; font-weight: 650;
-    }
-    .bar button.secondary { background: #fff; color: #111; border: 1px solid #ddd; }
-    .bar button:disabled { opacity: .5; cursor: not-allowed; }
-    .status { font-size: 13px; color: #444; }
+  /* ⬅️ WIDER PAGE */
+  #captureArea { 
+    max-width: 1800px; 
+    margin: 0 auto; 
+  }
 
-    /* Fixed quilt grid */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(10, minmax(0, 1fr)); /* 10 columns */
-      gap: var(--gap);
-    }
-    @media (max-width: 900px) {
-      .grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } /* phone */
-    }
+  h1 { 
+    font-size: 20px; 
+    margin: 0 0 12px; 
+    font-weight: 650; 
+  }
 
-    .cell {
-      background: white;
-      border-radius: 14px;
-      overflow: hidden;
-      box-shadow: 0 2px 10px rgba(0,0,0,.06);
-      display: flex;
-      flex-direction: column;
-      cursor: pointer;
-      user-select: none;
-    }
-    .imgWrap {
-      position: relative;
-      aspect-ratio: 1/1;
-      background: #f1f1f1;
-      overflow: hidden;
-    }
-    .imgWrap img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .placeholder {
-      width: 100%; height: 100%;
-      display: flex; align-items: center; justify-content: center;
-      color: #777; font-size: 12px; padding: 10px; text-align: center;
-    }
-    .meta {
-      position: absolute; left: 8px; top: 8px;
-      background: rgba(0,0,0,.55); color: #fff; font-size: 11px;
-      padding: 4px 6px; border-radius: 999px; backdrop-filter: blur(6px);
-    }
-    .caption {
-      padding: 10px 10px 12px;
-      border-top: 1px solid #eee;
-      min-height: 38px;
-      font-size: 13px;
-      display: flex; align-items: center;
-      word-break: break-word;
-    }
+  .bar {
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 10px; 
+    align-items: center;
+    background: white; 
+    padding: 12px; 
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.06);
+    margin-bottom: 14px;
+  }
 
-    /* Modal */
-    .modal {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,.55);
-      display: none;
-      align-items: center; justify-content: center;
-      padding: 16px;
-      z-index: 100;
-    }
-    .modal.open { display: flex; }
-    .panel {
-      width: min(520px, 96vw);
-      background: white;
-      border-radius: 16px;
-      padding: 14px;
-      box-shadow: 0 18px 70px rgba(0,0,0,.35);
-    }
-    .panel h2 { margin: 0 0 10px; font-size: 16px; }
-    .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-    .panel input[type="file"] { width: 100%; }
-    .panel input[type="text"] {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: 1px solid #ddd;
-      outline: none;
-      font-size: 14px;
-    }
-    .panel .buttons { display: flex; justify-content: flex-end; gap: 10px; margin-top: 12px; }
-    .panel button {
-      border: 0; padding: 10px 12px; border-radius: 10px; cursor: pointer;
-      background: #111; color: #fff; font-weight: 650;
-    }
-    .panel button.secondary { background: #fff; color: #111; border: 1px solid #ddd; }
+  .bar button {
+    border: 0; 
+    padding: 10px 12px; 
+    border-radius: 10px; 
+    cursor: pointer;
+    background: #111; 
+    color: #fff; 
+    font-weight: 650;
+  }
 
-    /* Lightbox */
-    .lightbox {
-      position: fixed; inset: 0; background: rgba(0,0,0,.75);
-      display: none; align-items: center; justify-content: center; padding: 18px;
-      z-index: 200;
+  .bar button.secondary { 
+    background: #fff; 
+    color: #111; 
+    border: 1px solid #ddd; 
+  }
+
+  .status { 
+    font-size: 14px; 
+    color: #444; 
+  }
+
+  /* ✅ VERY BIG TILES */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));   /* BIG tiles */
+    gap: var(--gap);
+  }
+
+  /* Mobile */
+  @media (max-width: 900px) {
+    .grid { 
+      grid-template-columns: repeat(2, minmax(0, 1fr)); 
     }
-    .lightbox.open { display: flex; }
-    .lightbox img {
-      max-width: min(980px, 96vw);
-      max-height: 92vh;
-      border-radius: 14px;
-      background: #000;
-    }
-  </style>
+  }
+
+  .cell {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,.06);
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .imgWrap {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    background: #f1f1f1;
+    overflow: hidden;
+  }
+
+  .imgWrap img {
+    width: 100%; 
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .placeholder {
+    width: 100%; 
+    height: 100%;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    color: #777; 
+    font-size: 14px; 
+    padding: 12px; 
+    text-align: center;
+  }
+
+  .meta {
+    position: absolute; 
+    left: 10px; 
+    top: 10px;
+    background: rgba(0,0,0,.55); 
+    color: #fff; 
+    font-size: 12px;
+    padding: 6px 8px; 
+    border-radius: 999px; 
+    backdrop-filter: blur(6px);
+  }
+
+  /* ⬅️ BIGGER CAPTION TEXT */
+  .caption {
+    padding: 12px 12px 8px;
+    border-top: 1px solid #eee;
+    min-height: 44px;
+    font-size: 14px;
+    display: flex; 
+    align-items: center;
+    word-break: break-word;
+  }
+
+  .links {
+    padding: 0 12px 14px;
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .links a {
+    color: #2563eb;
+    text-decoration: underline;
+    word-break: break-all;
+  }
+</style>
 </head>
 
 <body>
   <div id="captureArea">
-    <h1>Please upload an image of your favorite digital artwork that you made.</h1>
+    <h1>
+      Please upload an image of your favorite digital artwork, add a caption,
+      and optionally include one or two website links related to your work.
+    </h1>
 
     <div class="bar">
       <button id="resetBtn" class="secondary">Reset Images</button>
       <button id="saveBtn" class="secondary">Save Screen</button>
-      <span class="status" id="status">Click a square to add/replace an image + caption.</span>
+      <span class="status" id="status">
+        Click a square to add or replace an image, caption, and links.
+      </span>
     </div>
 
     <div id="grid" class="grid"></div>
@@ -145,7 +174,9 @@
       <h2 id="modalTitle">Add to tile</h2>
       <div class="row">
         <input id="fileInput" type="file" accept="image/*" />
-        <input id="captionInput" type="text" maxlength="120" placeholder="Type a caption (optional)..." />
+        <input id="captionInput" type="text" maxlength="500" placeholder="Type a caption (optional)..." />
+        <input id="link1Input" type="text" placeholder="Website link 1 (optional)..." />
+        <input id="link2Input" type="text" placeholder="Website link 2 (optional)..." />
       </div>
       <div class="buttons">
         <button id="cancelBtn" class="secondary">Cancel</button>
@@ -168,37 +199,27 @@
       getDatabase, ref as dbRef, onValue, set, remove, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-    // ✅ Replace with your config
-const firebaseConfig = {
+    // Firebase config (unchanged)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBCLpqzaQED9PpwSzVOgmEmx9PMngVqaoE",
+      authDomain: "art104digitalartwork.firebaseapp.com",
+      databaseURL: "https://art104digitalartwork-default-rtdb.firebaseio.com",
+      projectId: "art104digitalartwork",
+      storageBucket: "art104digitalartwork.firebasestorage.app",
+      messagingSenderId: "658605624357",
+      appId: "1:658605624357:web:9ba9695568e8e2afdf83cc",
+      measurementId: "G-1BP2M55DJR"
+    };
 
-  apiKey: "AIzaSyBCLpqzaQED9PpwSzVOgmEmx9PMngVqaoE",
-
-  authDomain: "art104digitalartwork.firebaseapp.com",
-
-  databaseURL: "https://art104digitalartwork-default-rtdb.firebaseio.com",
-
-  projectId: "art104digitalartwork",
-
-  storageBucket: "art104digitalartwork.firebasestorage.app",
-
-  messagingSenderId: "658605624357",
-
-  appId: "1:658605624357:web:9ba9695568e8e2afdf83cc",
-
-  measurementId: "G-1BP2M55DJR"
-
-};
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // Quilt settings
     const ROWS = 5;
     const COLS = 10;
     const TILE_COUNT = ROWS * COLS;
-    const MAX_EDGE = 320;      // resize longest edge to this
-    const JPEG_QUALITY = 0.75; // 0..1 (lower = smaller)
+    const MAX_EDGE = 320;
+    const JPEG_QUALITY = 0.75;
 
-    // Simple local id (no auth)
     const clientId = (() => {
       const k = "quiltClientId";
       let v = localStorage.getItem(k);
@@ -209,7 +230,6 @@ const firebaseConfig = {
       return v;
     })();
 
-    // UI
     const gridEl = document.getElementById("grid");
     const statusEl = document.getElementById("status");
     const resetBtn = document.getElementById("resetBtn");
@@ -220,6 +240,8 @@ const firebaseConfig = {
     const modalTitle = document.getElementById("modalTitle");
     const fileInput = document.getElementById("fileInput");
     const captionInput = document.getElementById("captionInput");
+    const link1Input = document.getElementById("link1Input");
+    const link2Input = document.getElementById("link2Input");
     const uploadBtn = document.getElementById("uploadBtn");
     const cancelBtn = document.getElementById("cancelBtn");
     const modalStatus = document.getElementById("modalStatus");
@@ -232,30 +254,31 @@ const firebaseConfig = {
 
     function setStatus(msg) { statusEl.textContent = msg; }
     function setModalStatus(msg) { modalStatus.textContent = msg; }
+
     function openModal(index) {
       activeIndex = index;
       activeFile = null;
       fileInput.value = "";
       captionInput.value = "";
+      link1Input.value = "";
+      link2Input.value = "";
       uploadBtn.disabled = true;
       modalTitle.textContent = `Tile ${index + 1} of ${TILE_COUNT}`;
-      setModalStatus(`Choose an image for tile ${index + 1}. (It will be compressed before saving.)`);
+      setModalStatus(`Choose an image for tile ${index + 1}.`);
       modal.classList.add("open");
-      modal.setAttribute("aria-hidden", "false");
     }
+
     function closeModal() {
       modal.classList.remove("open");
-      modal.setAttribute("aria-hidden", "true");
       activeIndex = null;
       activeFile = null;
     }
 
-    // Build empty grid UI once
     const cellEls = [];
+
     for (let i = 0; i < TILE_COUNT; i++) {
       const cell = document.createElement("div");
       cell.className = "cell";
-      cell.dataset.index = String(i);
 
       const wrap = document.createElement("div");
       wrap.className = "imgWrap";
@@ -273,50 +296,58 @@ const firebaseConfig = {
 
       const cap = document.createElement("div");
       cap.className = "caption";
-      cap.textContent = "";
+
+      const links = document.createElement("div");
+      links.className = "links";
 
       cell.appendChild(wrap);
       cell.appendChild(cap);
+      cell.appendChild(links);
+      gridEl.appendChild(cell);
 
       cell.addEventListener("click", () => openModal(i));
-      // If there's an image, clicking the image area will open lightbox instead (we’ll wire that in render)
-      gridEl.appendChild(cell);
-      cellEls.push({ cell, wrap, cap, meta, placeholder });
+      cellEls.push({ wrap, cap, links, meta, placeholder });
     }
 
-    // Listen to quilt state
     const quiltRef = dbRef(db, "quiltTiles");
-    onValue(quiltRef, (snap) => {
-      const tiles = snap.val() || {};
-      renderQuilt(tiles);
-    });
+    onValue(quiltRef, (snap) => renderQuilt(snap.val() || {}));
 
     function renderQuilt(tiles) {
       for (let i = 0; i < TILE_COUNT; i++) {
-        const t = tiles[i] || null;
-        const { wrap, cap, meta, placeholder } = cellEls[i];
+        const t = tiles[i];
+        const { wrap, cap, links, meta, placeholder } = cellEls[i];
 
-        // clear wrap except meta (we’ll rebuild)
-        // easiest: remove everything then re-add meta
         wrap.innerHTML = "";
         wrap.appendChild(meta);
-
-        meta.textContent = t?.clientId ? t.clientId : `#${i+1}`;
+        links.innerHTML = "";
 
         if (t?.dataUrl) {
           const img = document.createElement("img");
           img.src = t.dataUrl;
-          img.alt = "tile artwork";
-          img.loading = "lazy";
           wrap.appendChild(img);
-
-          // Clicking image opens lightbox
           img.addEventListener("click", (e) => {
             e.stopPropagation();
             openLightbox(t.dataUrl);
           });
 
-          cap.textContent = t.caption?.trim() ? t.caption.trim() : "(no caption)";
+          cap.textContent = t.caption || "(no caption)";
+
+          if (t.link1) {
+            const a = document.createElement("a");
+            a.href = t.link1.startsWith("http") ? t.link1 : `https://${t.link1}`;
+            a.textContent = t.link1;
+            a.target = "_blank";
+            links.appendChild(a);
+          }
+
+          if (t.link2) {
+            const a = document.createElement("a");
+            a.href = t.link2.startsWith("http") ? t.link2 : `https://${t.link2}`;
+            a.textContent = t.link2;
+            a.target = "_blank";
+            links.appendChild(a);
+          }
+
         } else {
           wrap.appendChild(placeholder);
           cap.textContent = "";
@@ -324,144 +355,74 @@ const firebaseConfig = {
       }
     }
 
-    // Modal interactions
     fileInput.addEventListener("change", () => {
       activeFile = fileInput.files?.[0] || null;
-      if (!activeFile) {
-        uploadBtn.disabled = true;
-        setModalStatus("Choose an image file.");
-        return;
-      }
-      if (!activeFile.type.startsWith("image/")) {
-        activeFile = null;
-        fileInput.value = "";
-        uploadBtn.disabled = true;
-        setModalStatus("That’s not an image. Try again.");
-        return;
-      }
-      uploadBtn.disabled = false;
-      setModalStatus("Ready to upload to this tile.");
+      uploadBtn.disabled = !activeFile;
     });
 
     cancelBtn.addEventListener("click", closeModal);
     modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
 
-    // Compress image to dataURL (no Storage)
     async function fileToCompressedDataUrl(file) {
-      const dataUrl = await new Promise((resolve, reject) => {
+      const dataUrl = await new Promise(res => {
         const r = new FileReader();
-        r.onload = () => resolve(r.result);
-        r.onerror = reject;
+        r.onload = () => res(r.result);
         r.readAsDataURL(file);
       });
 
-      const img = await new Promise((resolve, reject) => {
+      const img = await new Promise(res => {
         const im = new Image();
-        im.onload = () => resolve(im);
-        im.onerror = reject;
+        im.onload = () => res(im);
         im.src = dataUrl;
       });
 
-      const w = img.naturalWidth || img.width;
-      const h = img.naturalHeight || img.height;
-
-      // scale so the longest edge is MAX_EDGE
-      const scale = Math.min(1, MAX_EDGE / Math.max(w, h));
-      const cw = Math.max(1, Math.round(w * scale));
-      const ch = Math.max(1, Math.round(h * scale));
-
+      const scale = Math.min(1, 320 / Math.max(img.width, img.height));
       const canvas = document.createElement("canvas");
-      canvas.width = cw;
-      canvas.height = ch;
-      const ctx = canvas.getContext("2d");
-
-      // Draw
-      ctx.drawImage(img, 0, 0, cw, ch);
-
-      // JPEG is much smaller than PNG for photos
-      return canvas.toDataURL("image/jpeg", JPEG_QUALITY);
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      return canvas.toDataURL("image/jpeg", 0.75);
     }
 
     uploadBtn.addEventListener("click", async () => {
-      if (activeIndex === null || !activeFile) return;
+      if (!activeFile || activeIndex === null) return;
 
-      uploadBtn.disabled = true;
-      setModalStatus("Compressing + uploading to Firebase...");
+      const dataUrl = await fileToCompressedDataUrl(activeFile);
 
-      try {
-        const dataUrl = await fileToCompressedDataUrl(activeFile);
-        const caption = (captionInput.value || "").trim().slice(0, 120);
+      await set(dbRef(db, `quiltTiles/${activeIndex}`), {
+        dataUrl,
+        caption: captionInput.value.trim(),
+        link1: link1Input.value.trim(),
+        link2: link2Input.value.trim(),
+        clientId,
+        updatedAt: serverTimestamp()
+      });
 
-        // Store at a fixed index: quiltTiles/{index}
-        await set(dbRef(db, `quiltTiles/${activeIndex}`), {
-          dataUrl,
-          caption,
-          clientId,
-          updatedAt: serverTimestamp()
-        });
-
-        setModalStatus("Uploaded!");
-        closeModal();
-        setStatus(`Updated tile ${activeIndex + 1}.`);
-      } catch (err) {
-        console.error(err);
-        setModalStatus(`Upload failed: ${err?.code || err?.message || "unknown error"}`);
-        uploadBtn.disabled = false;
-      }
+      closeModal();
     });
 
-    // Reset quilt (clears all tiles)
     resetBtn.addEventListener("click", async () => {
       if (!confirm("Reset clears ALL quilt tiles for everyone. Continue?")) return;
-      try {
-        setStatus("Resetting quilt...");
-        await remove(dbRef(db, "quiltTiles"));
-        setStatus("Quilt reset.");
-      } catch (err) {
-        console.error(err);
-        setStatus(`Reset failed: ${err?.code || err?.message || "unknown error"}`);
-      }
+      await remove(dbRef(db, "quiltTiles"));
     });
 
-    // Save screen PNG
     saveBtn.addEventListener("click", async () => {
-      try {
-        setStatus("Saving screen...");
-        const scale = Math.min(2, window.devicePixelRatio || 1);
-        const canvas = await window.html2canvas(captureArea, {
-          scale,
-          useCORS: true,
-          backgroundColor: "#fafafa"
-        });
-        const pngUrl = canvas.toDataURL("image/png");
-        const a = document.createElement("a");
-        a.href = pngUrl;
-        a.download = `quilt_${Date.now()}.png`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        setStatus("Saved! (download started)");
-      } catch (err) {
-        console.error(err);
-        setStatus("Save failed (sometimes due to CORS).");
-      }
+      const canvas = await window.html2canvas(captureArea, { scale: 2 });
+      const a = document.createElement("a");
+      a.href = canvas.toDataURL("image/png");
+      a.download = `quilt_${Date.now()}.png`;
+      a.click();
     });
 
-    // Lightbox
     function openLightbox(url) {
       lightboxImg.src = url;
       lightbox.classList.add("open");
-      lightbox.setAttribute("aria-hidden", "false");
     }
-    function closeLightbox() {
+    lightbox.addEventListener("click", () => {
       lightbox.classList.remove("open");
-      lightbox.setAttribute("aria-hidden", "true");
       lightboxImg.src = "";
-    }
-    lightbox.addEventListener("click", closeLightbox);
-    window.addEventListener("keydown", (e) => { if (e.key === "Escape") closeLightbox(); });
+    });
 
-    setStatus("Click a square to add/replace an image + caption.");
   </script>
 </body>
 </html>
